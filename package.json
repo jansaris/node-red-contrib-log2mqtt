@@ -1,0 +1,64 @@
+{
+  "_from": "node-red-contrib-log2mqtt@1.0.3",
+  "_id": "node-red-contrib-log2mqtt@1.0.3",
+  "_inBundle": false,
+  "_location": "/node-red-contrib-log2mqtt",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "node-red-contrib-log2mqtt@1.0.3",
+    "name": "node-red-contrib-log2mqtt",
+    "escapedName": "node-red-contrib-log2mqtt",
+    "rawSpec": "1.0.3",
+    "saveSpec": null,
+    "fetchSpec": "1.0.3"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/node-red-contrib-log2mqtt/-/node-red-contrib-log2mqtt-1.0.3.tgz",
+  "_shasum": "c9e0c8fc2672459bac437a8a5db55b9cb02c9996",
+  "_spec": "node-red-contrib-log2mqtt@1.0.3",
+  "_where": "C:\\Users\\Jan\\.node-red",
+  "author": {
+    "name": "Jan Saris",
+    "email": "jansaris@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/atellezr/node-red-contrib-log2mqtt/issues"
+  },
+  "bundleDependencies": false,
+  "contributors": [
+    {
+      "name": "Jan Saris"
+    }
+  ],
+  "dependencies": {
+    "extend": "^3.0.2"
+  },
+  "deprecated": false,
+  "description": "Node-RED extension for managing logs at node level, showing information of each node when entering/exiting",
+  "devDependencies": {},
+  "homepage": "https://github.com/atellezr/node-red-contrib-log2mqtt#readme",
+  "keywords": [
+    "node-red",
+    "node-red-contrib",
+    "log2mqtt",
+    "logs"
+  ],
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "name": "node-red-contrib-log2mqtt",
+  "node-red": {
+    "nodes": {
+      "nodered-log2mqtt": "log2mqtt/log2mqtt.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atellezr/node-red-contrib-log2mqtt.git"
+  },
+  "version": "1.0.3"
+}
