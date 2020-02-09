@@ -1,10 +1,12 @@
 const connector = require("./connector");
 const mqtt = require("./mqtt");
+const configuration = require("./configuration");
 const extend = require("extend");
 
 // these function will contain the reference to some RED functions
 let eachNode, getNode;
 
+//TODO: Create interface for message, so we can use it in the reader
 function generateMessage(node, msg, action) {
 
   var message = extend(true, {}, msg);
@@ -20,8 +22,20 @@ function generateMessage(node, msg, action) {
   return message;
 }
 
+//TODO: Move filter method to updateNodes
+function filterOut(node) {
+  let filters = configuration.filters;
+  if(filters.id && filters.id.indexOf(node.id) !== -1) return true;
+  if(filters.type && filters.type.indexOf(node.type) !== -1) return true;
+  if(node.name && filters.name && filters.name.indexOf(node.name) !== -1) return true;
+  return false;
+}
+
 function handleMessage(node, msg, action) {
-  //TODO: Filter the messages
+  if(filterOut(node)) {
+    console.info("Filtered: %s", msg._msgid);
+    return;
+  }
   var message = generateMessage(node, msg, action);
   mqtt.send(message);
 }
