@@ -9,15 +9,18 @@ let eachNode, getNode;
 //TODO: Create interface for message, so we can use it in the reader
 function generateMessage(node, msg, action) {
 
-  var message = extend(true, {}, msg);
-  delete message._msgid;
+  var data = extend(true, {}, msg);
+  delete data._msgid;
 
+  var message = {};
   message.id = msg._msgid;
   message.action = action;
-  message.node = node.id;
-  message.nodeType = node.type;
-  message.nodeName = node.name;
-  message.flow = node.z;
+  message.node = {};
+  message.node.id = node.id;
+  message.node.type = node.type;
+  message.node.name = node.name;
+  message.node.flow = node.z;
+  message.data = data;
 
   return message;
 }
