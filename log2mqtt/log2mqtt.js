@@ -1,6 +1,5 @@
 const connector = require("./connector");
 const mqtt = require("./mqtt");
-const configuration = require("./configuration");
 const extend = require("extend");
 
 // these function will contain the reference to some RED functions
@@ -25,20 +24,7 @@ function generateMessage(node, msg, action) {
   return message;
 }
 
-//TODO: Move filter method to updateNodes
-function filterOut(node) {
-  let filters = configuration.filters;
-  if(filters.id && filters.id.indexOf(node.id) !== -1) return true;
-  if(filters.type && filters.type.indexOf(node.type) !== -1) return true;
-  if(node.name && filters.name && filters.name.indexOf(node.name) !== -1) return true;
-  return false;
-}
-
 function handleMessage(node, msg, action) {
-  if(filterOut(node)) {
-    console.info("Filtered: %s", msg._msgid);
-    return;
-  }
   var message = generateMessage(node, msg, action);
   mqtt.send(message);
 }
@@ -52,11 +38,33 @@ function updateNodes() {
   let counter=0;
   eachNode((node) => {
     const node_object = getNode(node.id) || {on: function(){}, metric: function(){}};
+    let node_name = node_object.name || "";
+    if(node_name.indexOf("(no log)") !== -1) { 
+      console.log(`Ignore node '${node_object.name}'`);
+      return; 
+    }
+
+    let onReceive = node_name.indexOf("(log receive)") !== -1;
+    let onSend = node_name.indexOf("(log send)") !== -1;
+    if(onReceive || onSend) {
+      console.log(`Only add logging to '${node_object.name}' on receive '${onReceive}' or send '${onSend}'`);
+
+      node_name = node_name.replace("(log send)", "");
+      node_name = node_name.replace("(log receive)", "");
+      console.log(`Change node name from '${node_object.name}' to '${node_name}'`);
+      node_object.name = node_name;
+    }
+    if(!(onReceive || onSend)){
+      //Both statements were not found, that means we add logging.
+      //So put both on true
+      onReceive = true;
+      onSend = true;
+    }
+
     node_object.source_metric = node_object.metric;
     node_object.metric = function(eventname, msg, metricValue) {
-      if (eventname && (eventname === "receive" || eventname === "send")) {
-        handleMessage(node_object, msg, eventname);
-      }
+      if(onReceive && eventname === "receive") handleMessage(node_object, msg, eventname);
+      if(onSend && eventname === "send") handleMessage(node_object, msg, eventname);
       node_object.source_metric(eventname, msg, metricValue);
     };
     counter++;
