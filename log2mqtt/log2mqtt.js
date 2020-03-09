@@ -18,7 +18,7 @@ function generateMessage(node, msg, action) {
   message.node.id = node.id;
   message.node.type = node.type;
   message.node.name = node.name;
-  message.node.flow = node.z;
+  message.node.flow = node.flow;
   message.data = data;
 
   return message;
@@ -29,29 +29,45 @@ function handleMessage(node, msg, action) {
   mqtt.send(message);
 }
 
+function log(message, deployed){
+  console.log(message);
+  var obj = { id: 'Deploy', message };
+  if(deployed) obj.deployed = true;
+  mqtt.send(obj);
+}
+
 /**
  * Update all nodes in the flows, modifying the metric function in order
  * to control the "send" and "receive" events
  */
 function updateNodes() {
-  console.log("Updating nodes after a flows deployment...");
+  log("Updating nodes after a flows deployment...");
+  let flows = {};
   let counter=0;
   eachNode((node) => {
     const node_object = getNode(node.id) || {on: function(){}, metric: function(){}};
+    if(node.type === 'tab') {
+      flows[node.id] = node.label;
+      if(!flows[node.id]) flows[node.id] = `No label (${node.id})`;
+      let enabled = node.disabled ? 'disabled' : 'enabled';
+      log(`Found flow '${flows[node.id]}' which is ${enabled}`);
+      return;
+    }
+
     let node_name = node_object.name || "";
     if(node_name.indexOf("(no log)") !== -1) { 
-      console.log(`Ignore node '${node_object.name}'`);
+      log(`Ignore node '${node_object.name}'`);
       return; 
     }
 
     let onReceive = node_name.indexOf("(log receive)") !== -1;
     let onSend = node_name.indexOf("(log send)") !== -1;
     if(onReceive || onSend) {
-      console.log(`Only add logging to '${node_object.name}' on receive '${onReceive}' or send '${onSend}'`);
+      log(`Only add logging to '${node_object.name}' on receive '${onReceive}' or send '${onSend}'`);
 
       node_name = node_name.replace("(log send)", "");
       node_name = node_name.replace("(log receive)", "");
-      console.log(`Change node name from '${node_object.name}' to '${node_name}'`);
+      log(`Change node name from '${node_object.name}' to '${node_name}'`);
       node_object.name = node_name;
     }
     if(!(onReceive || onSend)){
@@ -61,6 +77,7 @@ function updateNodes() {
       onSend = true;
     }
 
+    node_object.flow = flows[node_object.z];
     node_object.source_metric = node_object.metric;
     node_object.metric = function(eventname, msg, metricValue) {
       if(onReceive && eventname === "receive") handleMessage(node_object, msg, eventname);
@@ -69,7 +86,7 @@ function updateNodes() {
     };
     counter++;
   });
-  console.log(`${counter} nodes updated after the flows deployment`);
+  log(`${counter} nodes updated after the flows deployment`, true);
 }
 
 // connects the function we want to execute when a deployment is done
